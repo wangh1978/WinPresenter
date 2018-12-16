@@ -51,7 +51,7 @@ namespace WinSharer
 
                 byte[] ipByte = System.Text.Encoding.ASCII.GetBytes(invitationString);
 
-                IPEndPoint endpoint = new IPEndPoint(IPAddress.Parse("255.255.255.255"), 7788);//默认向全世界所有主机发送即可，路由器自动给你过滤，只发给局域网主机
+                IPEndPoint endpoint = new IPEndPoint(IPAddress.Parse("255.255.255.255"), 7788);//默认向全局域网所有主机发送
 
                 System.Timers.Timer tick = new System.Timers.Timer();
 
@@ -64,7 +64,7 @@ namespace WinSharer
 
                 tick.Start();
 
-                WriteToFile(invitationString);
+                //WriteToFile(invitationString);
                 LogTextBox.Text += "Presentation Started. Your Desktop is being shared." + Environment.NewLine;
             }
             catch (Exception ex)

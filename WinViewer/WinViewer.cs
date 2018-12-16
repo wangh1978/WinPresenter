@@ -29,8 +29,10 @@ namespace WinViewer
         {
             string ConnectionString = null;
             UdpClient udpcRecv;
+            IPAddress ipAddr = Dns.Resolve(Dns.GetHostName()).AddressList[0];//获得当前IP地址
+            string ip = ipAddr.ToString();
 
-            IPEndPoint localIpep = new IPEndPoint(IPAddress.Parse("192.168.0.106"), 7788); // 本机IP，指定的端口号
+            IPEndPoint localIpep = new IPEndPoint(ipAddr, 7788); // 本机IP，指定的端口号
             IPEndPoint remoteIpep = new IPEndPoint(IPAddress.Any, 0); // 发送到的IP地址和端口号
             udpcRecv = new UdpClient(localIpep);
 
