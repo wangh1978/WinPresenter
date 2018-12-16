@@ -42,7 +42,7 @@ namespace WinViewer
             {
                 
                 byte[] bytRecv = udpcRecv.Receive(ref remoteIpep);
-                ConnectionString = System.Text.Encoding.Default.GetString(bytRecv);
+                ConnectionString = Encoding.Default.GetString(bytRecv);
                 //ConnectionString = ReadFromFile();
                 if (ConnectionString != null)
                 {
