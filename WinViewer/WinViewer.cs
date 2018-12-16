@@ -1,4 +1,4 @@
-/* All content in this sample is ”AS IS” with with no warranties, and confer no rights. 
+/* All content in this sample is ”AS IS?with with no warranties, and confer no rights. 
  * Any code on this blog is subject to the terms specified at http://www.microsoft.com/info/cpyright.mspx. 
  */
 
@@ -12,6 +12,10 @@ using System.Text;
 using System.Windows.Forms;
 using AxRDPCOMAPILib;
 
+using System.Timers;
+using System.Net.Sockets;
+using System.Net;
+
 namespace WinViewer
 {
     public partial class WinViewer : Form
@@ -23,18 +27,35 @@ namespace WinViewer
 
         private void ConnectButton_Click(object sender, EventArgs e)
         {
-            string ConnectionString = ReadFromFile();
-            if (ConnectionString != null)
+            string ConnectionString = null;
+            UdpClient udpcRecv;
+
+            IPEndPoint localIpep = new IPEndPoint(IPAddress.Parse("192.168.0.106"), 7788); // ±¾»úIP£¬Ö¸¶¨µÄ¶Ë¿ÚºÅ
+            IPEndPoint remoteIpep = new IPEndPoint(IPAddress.Any, 0); // ·¢ËÍµ½µÄIPµØÖ·ºÍ¶Ë¿ÚºÅ
+            udpcRecv = new UdpClient(localIpep);
+
+            System.Timers.Timer tick = new System.Timers.Timer();
+            tick.Interval = 3000;
+            tick.Elapsed += delegate
             {
-                try
+                
+                byte[] bytRecv = udpcRecv.Receive(ref remoteIpep);
+                ConnectionString = System.Text.Encoding.Default.GetString(bytRecv);
+                //ConnectionString = ReadFromFile();
+                if (ConnectionString != null)
                 {
-                    pRdpViewer.Connect(ConnectionString, "Viewer1", "");
+                    try
+                    {
+                        pRdpViewer.Connect(ConnectionString, "Viewer1", "");
+                    }
+                    catch (Exception ex)
+                    {
+                        LogTextBox.Text += ("Error in Connecting. Error Info: " + ex.ToString() + Environment.NewLine);
+                    }
                 }
-                catch (Exception ex)
-                {
-                    LogTextBox.Text += ("Error in Connecting. Error Info: " + ex.ToString() + Environment.NewLine);
-                }
-            }
+            };
+            
+            tick.Start();
         }
 
         private void DisconnectButton_Click(object sender, EventArgs e)

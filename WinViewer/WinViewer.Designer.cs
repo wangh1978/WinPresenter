@@ -1,4 +1,4 @@
-/* All content in this sample is ”AS IS” with with no warranties, and confer no rights. 
+/* All content in this sample is ”AS IS?with with no warranties, and confer no rights. 
  * Any code on this blog is subject to the terms specified at http://www.microsoft.com/info/cpyright.mspx. 
  */
 

@@ -1,4 +1,4 @@
-/* All content in this sample is ”AS IS” with with no warranties, and confer no rights. 
+/* All content in this sample is ”AS IS?with with no warranties, and confer no rights. 
  * Any code on this blog is subject to the terms specified at http://www.microsoft.com/info/cpyright.mspx. 
  */
 
@@ -12,6 +12,11 @@ using System.Text;
 using System.Windows.Forms;
 using System.Runtime.InteropServices;
 using RDPCOMAPILib;
+
+using System.Net;
+using System.Net.Sockets;
+
+using System.Timers;
 
 namespace WinSharer
 {
@@ -41,6 +46,24 @@ namespace WinSharer
                 m_pRdpSession.Open();
                 IRDPSRAPIInvitation pInvitation = m_pRdpSession.Invitations.CreateInvitation("WinPresenter","PresentationGroup","",5);
                 string invitationString = pInvitation.ConnectionString;
+
+                UdpClient UdpSender = new UdpClient(new IPEndPoint(IPAddress.Any, 0));
+
+                byte[] ipByte = System.Text.Encoding.ASCII.GetBytes(invitationString);
+
+                IPEndPoint endpoint = new IPEndPoint(IPAddress.Parse("255.255.255.255"), 7788);//Ä¬ÈÏÏòÈ«ÊÀ½çËùÓÐÖ÷»ú·¢ËÍ¼´¿É£¬Â·ÓÉÆ÷×Ô¶¯¸øÄã¹ýÂË£¬Ö»·¢¸ø¾ÖÓòÍøÖ÷»ú
+
+                System.Timers.Timer tick = new System.Timers.Timer();
+
+                tick.Interval = 3000;
+
+                tick.Elapsed += delegate
+                {
+                    UdpSender.Send(ipByte, ipByte.Length, endpoint);
+                };
+
+                tick.Start();
+
                 WriteToFile(invitationString);
                 LogTextBox.Text += "Presentation Started. Your Desktop is being shared." + Environment.NewLine;
             }
