@@ -50,7 +50,7 @@ namespace WinSharer
                 UdpClient UdpSender = new UdpClient(new IPEndPoint(IPAddress.Any, 0));
 
                 byte[] ipByte = System.Text.Encoding.ASCII.GetBytes(invitationString);
-
+                //以下内容参数需要添加配置
                 IPEndPoint endpoint = new IPEndPoint(IPAddress.Parse("255.255.255.255"), 7788);//默认向全局域网所有主机发送
 
                 System.Timers.Timer tick = new System.Timers.Timer();
