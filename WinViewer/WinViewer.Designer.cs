@@ -38,17 +38,20 @@ namespace WinViewer
             this.DisconnectButton = new System.Windows.Forms.Button();
             this.ControlButton = new System.Windows.Forms.Button();
             this.LogTextBox = new System.Windows.Forms.TextBox();
+            this.CaptureWndButton = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pRdpViewer)).BeginInit();
             this.SuspendLayout();
             // 
             // pRdpViewer
             // 
             this.pRdpViewer.AccessibleRole = System.Windows.Forms.AccessibleRole.None;
+            this.pRdpViewer.AllowDrop = true;
+            this.pRdpViewer.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pRdpViewer.Enabled = true;
-            this.pRdpViewer.Location = new System.Drawing.Point(12, 70);
+            this.pRdpViewer.Location = new System.Drawing.Point(0, 0);
             this.pRdpViewer.Name = "pRdpViewer";
             this.pRdpViewer.OcxState = ((System.Windows.Forms.AxHost.State)(resources.GetObject("pRdpViewer.OcxState")));
-            this.pRdpViewer.Size = new System.Drawing.Size(640, 512);
+            this.pRdpViewer.Size = new System.Drawing.Size(674, 562);
             this.pRdpViewer.TabIndex = 0;
             this.pRdpViewer.OnConnectionEstablished += new System.EventHandler(this.OnConnectionEstablished);
             this.pRdpViewer.OnConnectionFailed += new System.EventHandler(this.OnConnectionFailed);
@@ -59,19 +62,19 @@ namespace WinViewer
             // 
             this.ConnectButton.Location = new System.Drawing.Point(12, 11);
             this.ConnectButton.Name = "ConnectButton";
-            this.ConnectButton.Size = new System.Drawing.Size(75, 21);
+            this.ConnectButton.Size = new System.Drawing.Size(49, 21);
             this.ConnectButton.TabIndex = 1;
-            this.ConnectButton.Text = "Connect";
+            this.ConnectButton.Text = "Á¬½Ó";
             this.ConnectButton.UseVisualStyleBackColor = true;
             this.ConnectButton.Click += new System.EventHandler(this.ConnectButton_Click);
             // 
             // DisconnectButton
             // 
-            this.DisconnectButton.Location = new System.Drawing.Point(120, 11);
+            this.DisconnectButton.Location = new System.Drawing.Point(76, 11);
             this.DisconnectButton.Name = "DisconnectButton";
-            this.DisconnectButton.Size = new System.Drawing.Size(75, 21);
+            this.DisconnectButton.Size = new System.Drawing.Size(53, 21);
             this.DisconnectButton.TabIndex = 2;
-            this.DisconnectButton.Text = "Disconnect";
+            this.DisconnectButton.Text = "¶Ï¿ª";
             this.DisconnectButton.UseVisualStyleBackColor = true;
             this.DisconnectButton.Click += new System.EventHandler(this.DisconnectButton_Click);
             // 
@@ -92,8 +95,18 @@ namespace WinViewer
             this.LogTextBox.Name = "LogTextBox";
             this.LogTextBox.ReadOnly = true;
             this.LogTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.LogTextBox.Size = new System.Drawing.Size(450, 46);
+            this.LogTextBox.Size = new System.Drawing.Size(454, 46);
             this.LogTextBox.TabIndex = 4;
+            // 
+            // CaptureWndButton
+            // 
+            this.CaptureWndButton.Location = new System.Drawing.Point(135, 11);
+            this.CaptureWndButton.Name = "CaptureWndButton";
+            this.CaptureWndButton.Size = new System.Drawing.Size(53, 21);
+            this.CaptureWndButton.TabIndex = 2;
+            this.CaptureWndButton.Text = "½ØÍ¼";
+            this.CaptureWndButton.UseVisualStyleBackColor = true;
+            this.CaptureWndButton.Click += new System.EventHandler(this.CaptureWndButton_Click);
             // 
             // WinViewer
             // 
@@ -102,6 +115,7 @@ namespace WinViewer
             this.ClientSize = new System.Drawing.Size(674, 562);
             this.Controls.Add(this.LogTextBox);
             this.Controls.Add(this.ControlButton);
+            this.Controls.Add(this.CaptureWndButton);
             this.Controls.Add(this.DisconnectButton);
             this.Controls.Add(this.ConnectButton);
             this.Controls.Add(this.pRdpViewer);
@@ -111,8 +125,6 @@ namespace WinViewer
             this.ResumeLayout(false);
             this.PerformLayout();
 
-            this.m_bIsConnected = false;
-            this.m_ConnectIp = null;
         }
 
         #endregion
@@ -122,6 +134,7 @@ namespace WinViewer
         private System.Windows.Forms.Button DisconnectButton;
         private System.Windows.Forms.Button ControlButton;
         private System.Windows.Forms.TextBox LogTextBox;
+        private System.Windows.Forms.Button CaptureWndButton;
     }
 }
 

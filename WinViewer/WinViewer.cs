@@ -9,11 +9,143 @@ using System.Windows.Forms;
 using AxRDPCOMAPILib;
 using System.Net.Sockets;
 using System.Net;
+using System.Drawing;
+using System.Runtime.InteropServices;
 
 namespace WinViewer
 {
     public partial class WinViewer : Form
     {
+        public struct RECT
+        {
+            public int Left;
+            public int Top;
+            public int Right;
+            public int Bottom;
+        }
+
+        public static Bitmap GetWindowCapture(IntPtr hWnd)
+        {
+            IntPtr hscrdc = GetWindowDC(hWnd);
+            RECT windowRect = new RECT();
+            GetWindowRect(hWnd, ref windowRect);
+            int width = windowRect.Right - windowRect.Left;
+            int height = windowRect.Bottom - windowRect.Top;
+
+            IntPtr hbitmap = CreateCompatibleBitmap(hscrdc, width, height);
+            IntPtr hmemdc = CreateCompatibleDC(hscrdc);
+            SelectObject(hmemdc, hbitmap);
+            PrintWindow(hWnd, hmemdc, 0);
+            Bitmap bmp = Bitmap.FromHbitmap(hbitmap);
+            DeleteDC(hscrdc);//删除用过的对象
+            DeleteDC(hmemdc);//删除用过的对象
+            return bmp;
+        }
+
+        //[DllImport("user32")]
+        //[return: MarshalAs(UnmanagedType.Bool)]
+
+        [DllImport("user32.dll")]
+        public static extern int EnumChildWindows(IntPtr hWndParent, CallBack lpfn, int lParam);
+
+        public delegate bool CallBack(IntPtr hwnd, int lParam);
+
+        [DllImport("User32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+        public static extern IntPtr FindWindowEx(
+            IntPtr hwndParent,
+            uint hwndChildAfter,
+            string lpszClass,
+            string lpszWindow
+            );
+
+        private IntPtr FindWindowEx(IntPtr hwnd, string lpszWindow, bool bChild)
+        {
+            IntPtr iResult = IntPtr.Zero;
+            // 首先在父窗体上查找控件
+            iResult = FindWindowEx(hwnd, 0, null, lpszWindow);
+            // 如果找到直接返回控件句柄
+            if (iResult != IntPtr.Zero) return iResult;
+
+            // 如果设定了不在子窗体中查找
+            if (!bChild) return iResult;
+
+            // 枚举子窗体，查找控件句柄
+            int i = EnumChildWindows(
+            hwnd,
+            (h, l) =>
+            {
+                IntPtr f1 = FindWindowEx(h, 0, null, lpszWindow);
+                if (f1 == IntPtr.Zero)
+                    return true;
+                else
+                {
+                    iResult = f1;
+                    return false;
+                }
+            },
+            0);
+            // 返回查找结果
+            return iResult;
+        }
+
+        [DllImport("user32.dll")]
+        public static extern IntPtr GetWindowRect(IntPtr hWnd, ref RECT rect);
+
+        [DllImport("user32.dll")]
+        public static extern IntPtr GetWindowDC(IntPtr hwnd
+         );
+
+        [DllImport("user32.dll")]
+        public static extern bool PrintWindow(
+         IntPtr hwnd,                // Window to copy,Handle to the window that will be copied.
+         IntPtr hdcBlt,              // HDC to print into,Handle to the device context.
+         UInt32 nFlags               // Optional flags,Specifies the drawing options. It can be one of the following values.
+         );
+
+        [DllImport("gdi32.dll")]
+        public static extern IntPtr CreateDC(
+         string lpszDriver,         // driver name驱动名
+         string lpszDevice,         // device name设备名
+         string lpszOutput,         // not used; should be NULL
+         IntPtr lpInitData   // optional printer data
+         );
+        [DllImport("gdi32.dll")]
+        public static extern int BitBlt(
+         IntPtr hdcDest, // handle to destination DC目标设备的句柄
+         int nXDest,   // x-coord of destination upper-left corner目标对象的左上角的X坐标
+         int nYDest,   // y-coord of destination upper-left corner目标对象的左上角的Y坐标
+         int nWidth,   // width of destination rectangle目标对象的矩形宽度
+         int nHeight, // height of destination rectangle目标对象的矩形长度
+         IntPtr hdcSrc,   // handle to source DC源设备的句柄
+         int nXSrc,    // x-coordinate of source upper-left corner源对象的左上角的X坐标
+         int nYSrc,    // y-coordinate of source upper-left corner源对象的左上角的Y坐标
+         UInt32 dwRop   // raster operation code光栅的操作值
+         );
+
+        [DllImport("gdi32.dll")]
+        public static extern IntPtr CreateCompatibleDC(
+         IntPtr hdc // handle to DC
+         );
+
+        [DllImport("gdi32.dll")]
+        public static extern IntPtr CreateCompatibleBitmap(
+         IntPtr hdc,         // handle to DC
+         int nWidth,      // width of bitmap, in pixels
+         int nHeight      // height of bitmap, in pixels
+         );
+
+        [DllImport("gdi32.dll")]
+        public static extern IntPtr SelectObject(
+         IntPtr hdc,           // handle to DC
+         IntPtr hgdiobj    // handle to object
+         );
+
+        [DllImport("gdi32.dll")]
+        public static extern int DeleteDC(
+         IntPtr hdc           // handle to DC
+         );
+
+
         public WinViewer()
         {
             InitializeComponent();
@@ -39,13 +171,13 @@ namespace WinViewer
 
             IPEndPoint localIpep = new IPEndPoint(ipAddr, 7788); // 本机IP，指定的端口号
             IPEndPoint remoteIpep = new IPEndPoint(IPAddress.Any, 0); // 发送到的IP地址和端口号
-            udpcRecv = new UdpClient(localIpep);
+            
 
             Timer tick = new Timer();//这里必须使用System.Windows.Froms.Timer ，否则不在同一系工作线程
             tick.Interval = 3000;
             tick.Tick += delegate
             {
-                
+                udpcRecv = new UdpClient(localIpep);
                 byte[] bytRecv = udpcRecv.Receive(ref remoteIpep);
                 ConnectionString = Encoding.Default.GetString(bytRecv);
                 //ConnectionString = ReadFromFile();
@@ -65,6 +197,8 @@ namespace WinViewer
                         LogTextBox.Text += "链接错误. 错误信息: " + ex.ToString() + Environment.NewLine;
                     }
                 }
+                udpcRecv.Close();
+   
             };
             
             tick.Start();
@@ -74,6 +208,16 @@ namespace WinViewer
         {
             pRdpViewer.Disconnect();
         }
+
+        private void CaptureWndButton_Click(object sender, EventArgs e)
+        {
+            IntPtr HandleResult = FindWindowEx(pRdpViewer.Handle,@"Output Painter Window",true);
+
+            Bitmap sourceBitmap = GetWindowCapture(HandleResult);
+
+            sourceBitmap.Save(@"form2.bmp");
+        }
+
 
         private string ReadFromFile()
         {
