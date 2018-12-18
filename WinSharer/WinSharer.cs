@@ -4,11 +4,6 @@
 
 using System;
 using System.IO;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
 using System.Windows.Forms;
 using System.Runtime.InteropServices;
 using RDPCOMAPILib;
@@ -16,7 +11,6 @@ using RDPCOMAPILib;
 using System.Net;
 using System.Net.Sockets;
 
-using System.Timers;
 
 namespace WinSharer
 {
@@ -30,7 +24,7 @@ namespace WinSharer
         void OnAttendeeDisconnected(object pDisconnectInfo)
         {
             IRDPSRAPIAttendeeDisconnectInfo pDiscInfo = pDisconnectInfo as IRDPSRAPIAttendeeDisconnectInfo;
-            LogTextBox.Text += ("Attendee Disconnected: " + pDiscInfo.Attendee.RemoteName + Environment.NewLine);
+            LogTextBox.Text += ("链接中断: " + pDiscInfo.Attendee.RemoteName + Environment.NewLine);
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -53,23 +47,21 @@ namespace WinSharer
                 //以下内容参数需要添加配置
                 IPEndPoint endpoint = new IPEndPoint(IPAddress.Parse("255.255.255.255"), 7788);//默认向全局域网所有主机发送
 
-                System.Timers.Timer tick = new System.Timers.Timer();
+                m_Timer.Interval = 3000;
 
-                tick.Interval = 3000;
-
-                tick.Elapsed += delegate
+                m_Timer.Tick += delegate
                 {
                     UdpSender.Send(ipByte, ipByte.Length, endpoint);
                 };
 
-                tick.Start();
+                m_Timer.Start();
 
                 //WriteToFile(invitationString);
-                LogTextBox.Text += "Presentation Started. Your Desktop is being shared." + Environment.NewLine;
+                LogTextBox.Text += "开启局域网共享广播." + Environment.NewLine;
             }
             catch (Exception ex)
             {
-                LogTextBox.Text += "Error occured while starting presentation. Error: " + ex.ToString() + Environment.NewLine;
+                LogTextBox.Text += "当前共享广播出错. 错误: " + ex.ToString() + Environment.NewLine;
             }
         }
 
@@ -85,14 +77,15 @@ namespace WinSharer
         {
             try
             {
+                m_Timer.Start();
                 m_pRdpSession.Close();
-                LogTextBox.Text += "Presentation Stopped." + Environment.NewLine;
+                LogTextBox.Text += "停止共享." + Environment.NewLine;
                 Marshal.ReleaseComObject(m_pRdpSession);
                 m_pRdpSession = null;
             }
             catch (Exception ex)
             {
-                LogTextBox.Text += "Error occured while stopping presentation. Error: " + ex.ToString();
+                LogTextBox.Text += "停止共享出错. 错误: " + ex.ToString();
             }
         }
 
@@ -100,7 +93,7 @@ namespace WinSharer
         {
             IRDPSRAPIAttendee pAttendee = pObjAttendee as IRDPSRAPIAttendee;
             pAttendee.ControlLevel = CTRL_LEVEL.CTRL_LEVEL_VIEW;
-            LogTextBox.Text += ("Attendee Connected: " + pAttendee.RemoteName + Environment.NewLine);
+            LogTextBox.Text += ("链接到控制端: " + pAttendee.RemoteName + Environment.NewLine);
         }
 
         public void WriteToFile(string InviteString)
@@ -111,5 +104,6 @@ namespace WinSharer
             }
 
         }
+        private Timer m_Timer = new Timer();
     }
 }

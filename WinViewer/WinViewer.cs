@@ -4,15 +4,9 @@
 
 using System;
 using System.IO;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
 using AxRDPCOMAPILib;
-
-using System.Timers;
 using System.Net.Sockets;
 using System.Net;
 
@@ -29,10 +23,10 @@ namespace WinViewer
         {
             string ConnectionString = null;
             UdpClient udpcRecv;
-            string _IP;
             IPAddress ipAddr = null;
             IPHostEntry ipAddrEntry = Dns.GetHostEntry(Dns.GetHostName());//获得当前HOST集
 
+            //找到ipv4有效的hostip
             foreach (IPAddress _IPAddress in ipAddrEntry.AddressList)
             {
                 if (_IPAddress.AddressFamily.ToString() == "InterNetwork")
@@ -47,9 +41,9 @@ namespace WinViewer
             IPEndPoint remoteIpep = new IPEndPoint(IPAddress.Any, 0); // 发送到的IP地址和端口号
             udpcRecv = new UdpClient(localIpep);
 
-            System.Timers.Timer tick = new System.Timers.Timer();
+            Timer tick = new Timer();//这里必须使用System.Windows.Froms.Timer ，否则不在同一系工作线程
             tick.Interval = 3000;
-            tick.Elapsed += delegate
+            tick.Tick += delegate
             {
                 
                 byte[] bytRecv = udpcRecv.Receive(ref remoteIpep);
@@ -59,12 +53,16 @@ namespace WinViewer
                 {
                     try
                     {
+                        string shareIp = remoteIpep.Address.ToString();
+                        m_ConnectIp = shareIp;//该接口用来以后显示连接中的客户端IP
+                        LogTextBox.Text += "链接到终端机: " + m_ConnectIp + Environment.NewLine;
                         pRdpViewer.SmartSizing = true;
-                        pRdpViewer.Connect(ConnectionString, "Viewer1", "");
+                        pRdpViewer.Connect(ConnectionString, m_ConnectIp, "");
+                        tick.Stop();
                     }
                     catch (Exception ex)
                     {
-                        LogTextBox.Text += ("Error in Connecting. Error Info: " + ex.ToString() + Environment.NewLine);
+                        LogTextBox.Text += "链接错误. 错误信息: " + ex.ToString() + Environment.NewLine;
                     }
                 }
             };
@@ -99,7 +97,7 @@ namespace WinViewer
                 FileName = "inv.xml";
             }
             
-            LogTextBox.Text += ("Reading the connection string from the file name " +
+            LogTextBox.Text += ("从文件读取链接字窜 " +
                 FileName + Environment.NewLine);
             try
             {
@@ -111,14 +109,14 @@ namespace WinViewer
             }
             catch (Exception ex)
             {
-                LogTextBox.Text += ("Error in Reading input file. Error Info: " + ex.ToString() + Environment.NewLine);
+                LogTextBox.Text += ("读取链接字串文件出错. 错误信息: " + ex.ToString() + Environment.NewLine);
             }
             return ReadText;
         }
 
         private void OnConnectionEstablished(object sender, EventArgs e)
         {
-            LogTextBox.Text += "Connection Established" + Environment.NewLine;
+            LogTextBox.Text += "链接建立" + Environment.NewLine;
         }
 
         private void OnError(object sender, _IRDPSessionEvents_OnErrorEvent e)
@@ -129,7 +127,7 @@ namespace WinViewer
 
         private void OnConnectionTerminated(object sender, _IRDPSessionEvents_OnConnectionTerminatedEvent e)
         {
-            LogTextBox.Text += "Connection Terminated. Reason: " + e.discReason + Environment.NewLine;
+            LogTextBox.Text += "链接终止. 原因: " + e.discReason + Environment.NewLine;
         }
 
         private void ControlButton_Click(object sender, EventArgs e)
@@ -139,7 +137,10 @@ namespace WinViewer
 
         private void OnConnectionFailed(object sender, EventArgs e)
         {
-            LogTextBox.Text += "Connection Failed." + Environment.NewLine;
+            LogTextBox.Text += "链接失败." + Environment.NewLine;
         }
+
+        private string m_ConnectIp = null;
+        private bool m_bIsConnected = false;
     }
 }
