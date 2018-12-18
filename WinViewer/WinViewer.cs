@@ -29,7 +29,18 @@ namespace WinViewer
         {
             string ConnectionString = null;
             UdpClient udpcRecv;
-            IPAddress ipAddr = Dns.Resolve(Dns.GetHostName()).AddressList[0];//获得当前IP地址
+            string _IP;
+            IPAddress ipAddr = null;
+            IPHostEntry ipAddrEntry = Dns.GetHostEntry(Dns.GetHostName());//获得当前HOST集
+
+            foreach (IPAddress _IPAddress in ipAddrEntry.AddressList)
+            {
+                if (_IPAddress.AddressFamily.ToString() == "InterNetwork")
+                {
+                    ipAddr = _IPAddress;
+                }
+            }
+
             string ip = ipAddr.ToString();
 
             IPEndPoint localIpep = new IPEndPoint(ipAddr, 7788); // 本机IP，指定的端口号
@@ -48,6 +59,7 @@ namespace WinViewer
                 {
                     try
                     {
+                        pRdpViewer.SmartSizing = true;
                         pRdpViewer.Connect(ConnectionString, "Viewer1", "");
                     }
                     catch (Exception ex)
