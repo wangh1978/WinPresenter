@@ -45,6 +45,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="RdpViewerWindow.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="RdpViewerWindow.Designer.cs">
+      <DependentUpon>RdpViewerWindow.cs</DependentUpon>
+    </Compile>
     <Compile Include="WinViewer.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -53,6 +59,9 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="RdpViewerWindow.resx">
+      <DependentUpon>RdpViewerWindow.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="WinViewer.resx">
       <SubType>Designer</SubType>
       <DependentUpon>WinViewer.cs</DependentUpon>
@@ -69,6 +78,7 @@
     </Compile>
     <None Include="app.config" />
     <None Include="ClassDiagram1.cd" />
+    <None Include="ClassDiagram2.cd" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>

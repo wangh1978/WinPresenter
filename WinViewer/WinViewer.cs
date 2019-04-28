@@ -149,10 +149,18 @@ namespace WinViewer
         public WinViewer()
         {
             InitializeComponent();
+            this.IsMdiContainer = true;
         }
 
         private void ConnectButton_Click(object sender, EventArgs e)
         {
+            //RdpViewerWindow rdpViewerWindow = new RdpViewerWindow
+            //{
+            //    MdiParent = this
+            //};
+            //rdpViewerWindow.Show();
+            
+
             string ConnectionString = null;
             UdpClient udpcRecv;
             IPAddress ipAddr = null;

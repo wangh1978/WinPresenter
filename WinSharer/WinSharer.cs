@@ -10,6 +10,7 @@ using RDPCOMAPILib;
 
 using System.Net;
 using System.Net.Sockets;
+using System.Configuration;
 
 
 namespace WinSharer
@@ -19,6 +20,52 @@ namespace WinSharer
         public WinSharer()
         {
             InitializeComponent();
+            textIp.Text = GetConnectionStringsConfig("HostIp");
+        }
+
+        //依据连接串名字connectionName返回数据连接字符串  
+        public static string GetConnectionStringsConfig(string connectionName)
+        {
+            //指定config文件读取
+            string file = System.Windows.Forms.Application.ExecutablePath;
+            System.Configuration.Configuration config = ConfigurationManager.OpenExeConfiguration(file);
+            string connectionString =
+                config.ConnectionStrings.ConnectionStrings[connectionName].ConnectionString.ToString();
+            return connectionString;
+        }
+
+        ///<summary> 
+        ///更新连接字符串  
+        ///</summary> 
+        ///<param name="newName">连接字符串名称</param> 
+        ///<param name="newConString">连接字符串内容</param> 
+        ///<param name="newProviderName">数据提供程序名称</param> 
+        public static void UpdateConnectionStringsConfig(string newName, string newConString, string newProviderName)
+        {
+            //指定config文件读取
+            string file = System.Windows.Forms.Application.ExecutablePath;
+            Configuration config = ConfigurationManager.OpenExeConfiguration(file);
+
+            bool exist = false; //记录该连接串是否已经存在  
+            //如果要更改的连接串已经存在  
+            if (config.ConnectionStrings.ConnectionStrings[newName] != null)
+            {
+                exist = true;
+            }
+            // 如果连接串已存在，首先删除它  
+            if (exist)
+            {
+                config.ConnectionStrings.ConnectionStrings.Remove(newName);
+            }
+            //新建一个连接字符串实例  
+            ConnectionStringSettings mySettings =
+                new ConnectionStringSettings(newName, newConString, newProviderName);
+            // 将新的连接串添加到配置文件中.  
+            config.ConnectionStrings.ConnectionStrings.Add(mySettings);
+            // 保存对配置文件所作的更改  
+            config.Save(ConfigurationSaveMode.Modified);
+            // 强制重新载入配置文件的ConnectionStrings配置节  
+            ConfigurationManager.RefreshSection("connectionStrings");
         }
 
         void OnAttendeeDisconnected(object pDisconnectInfo)
@@ -36,7 +83,7 @@ namespace WinSharer
                 m_pRdpSession.OnAttendeeConnected += new _IRDPSessionEvents_OnAttendeeConnectedEventHandler(OnAttendeeConnected);
                 m_pRdpSession.OnAttendeeDisconnected += new _IRDPSessionEvents_OnAttendeeDisconnectedEventHandler(OnAttendeeDisconnected);
                 m_pRdpSession.OnControlLevelChangeRequest += new _IRDPSessionEvents_OnControlLevelChangeRequestEventHandler(OnControlLevelChangeRequest);
-
+                //m_pRdpSession.colordepth = 16;
                 m_pRdpSession.Open();
                 IRDPSRAPIInvitation pInvitation = m_pRdpSession.Invitations.CreateInvitation("WinPresenter","PresentationGroup","",5);
                 string invitationString = pInvitation.ConnectionString;
@@ -45,8 +92,10 @@ namespace WinSharer
 
                 byte[] ipByte = System.Text.Encoding.ASCII.GetBytes(invitationString);
                 //以下内容参数需要添加配置
-                IPEndPoint endpoint = new IPEndPoint(IPAddress.Parse("255.255.255.255"), 7788);//默认向全局域网所有主机发送
-
+                //IPEndPoint endpoint = new IPEndPoint(IPAddress.Parse("255.255.255.255"), 7788);//默认向全局域网所有主机发送
+                //IPEndPoint endpoint = new IPEndPoint(IPAddress.Parse("192.168.0.120"), 7788);//向指定主机发送
+                IPEndPoint endpoint = new IPEndPoint(IPAddress.Parse(textIp.Text), 7788);//向指定主机发送
+                
                 m_Timer.Interval = 3000;
 
                 m_Timer.Tick += delegate
@@ -105,5 +154,10 @@ namespace WinSharer
 
         }
         private Timer m_Timer = new Timer();
+
+        private void SetButton_Click(object sender, EventArgs e)
+        {
+            UpdateConnectionStringsConfig("HostIp",textIp.Text,"");
+        }
     }
 }

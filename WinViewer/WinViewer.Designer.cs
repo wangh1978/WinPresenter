@@ -51,7 +51,7 @@ namespace WinViewer
             this.pRdpViewer.Location = new System.Drawing.Point(0, 0);
             this.pRdpViewer.Name = "pRdpViewer";
             this.pRdpViewer.OcxState = ((System.Windows.Forms.AxHost.State)(resources.GetObject("pRdpViewer.OcxState")));
-            this.pRdpViewer.Size = new System.Drawing.Size(674, 562);
+            this.pRdpViewer.Size = new System.Drawing.Size(1278, 1006);
             this.pRdpViewer.TabIndex = 0;
             this.pRdpViewer.OnConnectionEstablished += new System.EventHandler(this.OnConnectionEstablished);
             this.pRdpViewer.OnConnectionFailed += new System.EventHandler(this.OnConnectionFailed);
@@ -112,7 +112,7 @@ namespace WinViewer
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(674, 562);
+            this.ClientSize = new System.Drawing.Size(1278, 1006);
             this.Controls.Add(this.LogTextBox);
             this.Controls.Add(this.ControlButton);
             this.Controls.Add(this.CaptureWndButton);
